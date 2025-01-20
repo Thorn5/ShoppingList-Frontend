@@ -1,12 +1,10 @@
 // App.jsx
 import './App.css'
-import ShoppingList from './components/ShoppingList'
-
+import ListContainer from './components/ListContainer'
 function App() {
-
   return (
     <>
-      <ShoppingList/>
+    <ListContainer/>
     </>
   )
 }
