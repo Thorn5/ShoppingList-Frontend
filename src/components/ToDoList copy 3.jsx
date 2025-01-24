@@ -5,7 +5,7 @@ import Accordion from './Accordion';
 
 const ToDoList = ({ toDoListData }) => {
   return (
-    <>
+    <Accordion title="To Do">
       {toDoListData.map((category) => (
         <Accordion key={category.list_id} title={category.name}>
           <p>{category.description}</p>
@@ -22,7 +22,7 @@ const ToDoList = ({ toDoListData }) => {
           )}
         </Accordion>
       ))}
-    </>
+    </Accordion>
   );
 };
 

@@ -1,5 +1,4 @@
 // useAsyncAwait.js
-// useAsyncAwait.js
 import { useState, useEffect } from "react";
 
 const useAsyncAwait = (url) => {
@@ -10,7 +9,6 @@ const useAsyncAwait = (url) => {
   const [error, setError] = useState(null);
   const [apiData, setApiData] = useState([]);
   const moduleCalled = "fetched using useAsyncAwait";
-  const [callCount, setCallCount] = useState(0);
 
   const fetchData = async () => {
     setLoading(true);
@@ -26,9 +24,6 @@ const useAsyncAwait = (url) => {
       console.log({ error });
     } finally {
       setLoading(false);
-      setCallCount(callCount + 1);
-      console.log('callCount: ', callCount);
-      
     }
     
   };
