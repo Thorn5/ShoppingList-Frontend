@@ -1,31 +1,76 @@
 // ShoppingList.jsx
-import React from "react";
+
+import { useState } from 'react';
+import Accordion from './Accordion';
 
 const ShoppingList = ({ shoppingListData }) => {
+  const [openShops, setOpenShops] = useState({});
+  const [openAisles, setOpenAisles] = useState({});
+  const [openProducts, setOpenProducts] = useState({});
+
+  const toggleAccordion = (level, id) => {
+    const setterMap = {
+      0: setOpenShops,
+      1: setOpenAisles,
+      2: setOpenProducts,
+    };
+    setterMap[level]((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleDoubleClick = (level) => {
+    const setterMap = {
+      0: setOpenShops,
+      1: setOpenAisles,
+      2: setOpenProducts,
+    };
+    setterMap[level]((prev) => {
+      const allOpen = Object.values(prev).every(Boolean);
+      const newState = {};
+      Object.keys(prev).forEach((key) => {
+        newState[key] = !allOpen;
+      });
+      return newState;
+    });
+  };
+
   return (
     <div className="shopping-list">
       {shoppingListData.map((shop) => (
-        <div key={shop.list_shop_id} className="shop-item">
-          <h3>{shop.shop_name}</h3>
+        <Accordion
+          key={shop.list_shop_id}
+          title={shop.shop_name}
+          isOpen={openShops[shop.list_shop_id]}
+          onToggle={() => toggleAccordion(0, shop.list_shop_id)}
+          onDoubleClick={handleDoubleClick}
+          level={0}
+        >
           {shop.aisles.map((aisle) => (
-            <div key={aisle.aisle_id} className="aisle-item">
-              <h4>{aisle.name}</h4>
-              <ul>
-                {aisle.products.map((product) => (
-                  <li key={product.product_id}>
-                    <strong>{product.name}</strong>
-                    <p>Notes: {product.notes}</p>
-                    <p>Quantity: {product.quantity}</p>
-                    <p>Price: ${product.price.toFixed(2)}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Accordion
+              key={aisle.aisle_id}
+              title={aisle.name}
+              isOpen={openAisles[aisle.aisle_id]}
+              onToggle={() => toggleAccordion(1, aisle.aisle_id)}
+              onDoubleClick={handleDoubleClick}
+              level={1}
+            >
+              {aisle.products.map((product) => (
+                <Accordion
+                  key={product.product_id}
+                  title={`${product.name} (Quantity: ${product.quantity})`}
+                  isOpen={openProducts[product.product_id]}
+                  onToggle={() => toggleAccordion(2, product.product_id)}
+                  onDoubleClick={handleDoubleClick}
+                  level={2}
+                >
+                  <p>Notes: {product.notes}</p>
+                </Accordion>
+              ))}
+            </Accordion>
           ))}
-        </div>
+        </Accordion>
       ))}
     </div>
   );
 };
 
-export default ShoppingList
+export default ShoppingList;
