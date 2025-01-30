@@ -1,4 +1,3 @@
-// ToDoList.jsx
 import { useState } from 'react';
 import Accordion from './Accordion';
 
@@ -6,6 +5,7 @@ const ToDoList = ({ toDoListData }) => {
   const [openCategories, setOpenCategories] = useState({});
   const [openEntries, setOpenEntries] = useState({});
 
+  // Toggle individual accordions
   const toggleAccordion = (level, id) => {
     const setterMap = {
       0: setOpenCategories,
@@ -14,16 +14,18 @@ const ToDoList = ({ toDoListData }) => {
     setterMap[level]((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleDoubleClick = (level) => {
+  // Expand/Collapse all accordions at a specific level
+  const toggleExpandAllAtLevel = (level, parentId, items) => {
     const setterMap = {
       0: setOpenCategories,
       1: setOpenEntries,
     };
+
     setterMap[level]((prev) => {
-      const allOpen = Object.values(prev).every(Boolean);
-      const newState = {};
-      Object.keys(prev).forEach((key) => {
-        newState[key] = !allOpen;
+      const allExpanded = items.every((item) => prev[item.id]);
+      const newState = { ...prev };
+      items.forEach((item) => {
+        newState[item.id] = !allExpanded;
       });
       return newState;
     });
@@ -31,16 +33,44 @@ const ToDoList = ({ toDoListData }) => {
 
   return (
     <>
+      {/* Top-level Expand/Collapse All for Categories */}
+      <button
+        onClick={() =>
+          toggleExpandAllAtLevel(
+            0,
+            null,
+            toDoListData.map((category) => ({ id: category.list_id }))
+          )
+        }
+      >
+        {Object.values(openCategories).every(Boolean)
+          ? 'Collapse All Categories'
+          : 'Expand All Categories'}
+      </button>
+
       {toDoListData.map((category) => (
         <Accordion
           key={category.list_id}
           title={category.name}
           isOpen={openCategories[category.list_id]}
           onToggle={() => toggleAccordion(0, category.list_id)}
-          onDoubleClick={handleDoubleClick}
           level={0}
         >
-          <p>{category.description}</p>
+          {/* Expand/Collapse All Entries within a Category */}
+          <button
+            onClick={() =>
+              toggleExpandAllAtLevel(
+                1,
+                category.list_id,
+                category.entries.map((entry) => ({ id: entry.entry_id }))
+              )
+            }
+          >
+            {category.entries.every((entry) => openEntries[entry.entry_id])
+              ? 'Collapse All Entries'
+              : 'Expand All Entries'}
+          </button>
+
           {category.entries && category.entries.length > 0 ? (
             category.entries.map((entry) => (
               <Accordion
@@ -48,7 +78,6 @@ const ToDoList = ({ toDoListData }) => {
                 title={entry.name}
                 isOpen={openEntries[entry.entry_id]}
                 onToggle={() => toggleAccordion(1, entry.entry_id)}
-                onDoubleClick={handleDoubleClick}
                 level={1}
               >
                 <p>{entry.description}</p>
