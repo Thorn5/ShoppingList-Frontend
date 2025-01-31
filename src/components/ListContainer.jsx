@@ -1,62 +1,51 @@
-  // ListContainer.jsx
-  import { Suspense, useState } from 'react';
-  import ShoppingList from './ShoppingList';
-  import ToDoList from './ToDoList';
-  import useAsyncAwait from '../customhooks/useAsyncAwait';
-  import Accordion from './Accordion';
-  
-  const ListContainer = () => {
-    const userId = 3;
-    const url = `${import.meta.env.VITE_SERVER_DOMAIN}/lists/${userId}`;
-  
-    const { loading, error, apiData } = useAsyncAwait(url);
-  
-    const shoppingListData = apiData?.shopping_lists || [];
-    const toDoListData = apiData?.todo_lists || [];
-  
-    const [openAccordion, setOpenAccordion] = useState(null);
-  
-    if (loading) {
-      return <div>Loading...</div>;
-    }
-    if (error) {
-      return <div>Error: {error}</div>;
-    }
-  
-    const toggleAccordion = (accordionName) => {
-      setOpenAccordion(openAccordion === accordionName ? null : accordionName);
-    };
-  
-    const handleDoubleClick = () => {
-      // No-op for ListContainer as we only want one accordion open at a time
-    };
-  
-    return (
-      <Suspense fallback={<div>Loading...</div>}>
-        <div className="accordion-container">
-          <Accordion
-            title="Shopping List"
-            isOpen={openAccordion === 'shopping'}
-            onToggle={() => toggleAccordion('shopping')}
-            onDoubleClick={handleDoubleClick}
-            level={0}
+// ListContainer.jsx
+import { Suspense, useState } from 'react';
+import ShoppingList from './ShoppingList';
+import ToDoList from './ToDoList';
+import useAsyncAwait from '../customhooks/useAsyncAwait';
+
+const ListContainer = () => {
+  const [activeTab, setActiveTab] = useState('shopping');
+  const userId = 3;
+  const url = `${import.meta.env.VITE_SERVER_DOMAIN}/lists/${userId}`;
+  const { loading, error, apiData } = useAsyncAwait(url);
+  const shoppingListData = apiData?.shopping_lists || [];
+  const toDoListData = apiData?.todo_lists || [];
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="container">
+        <div className="tab-container">
+          <button
+            onClick={() => setActiveTab('shopping')}
+            className={`tab ${activeTab === 'shopping' ? 'active' : ''}`}
           >
-            <ShoppingList shoppingListData={shoppingListData} />
-          </Accordion>
-  
-          <Accordion
-            title="To Do"
-            isOpen={openAccordion === 'todo'}
-            onToggle={() => toggleAccordion('todo')}
-            onDoubleClick={handleDoubleClick}
-            level={0}
+            Shopping List
+          </button>
+          <button
+            onClick={() => setActiveTab('todo')}
+            className={`tab ${activeTab === 'todo' ? 'active' : ''}`}
           >
-            <ToDoList toDoListData={toDoListData} />
-          </Accordion>
+            To-Do List
+          </button>
         </div>
-      </Suspense>
-    );
-  };
-  
-  export default ListContainer;
-  
+
+        <div>
+          {activeTab === 'shopping' ? (
+            <ShoppingList shoppingListData={shoppingListData} />
+          ) : (
+            <ToDoList toDoListData={toDoListData} />
+          )}
+        </div>
+      </div>
+    </Suspense>
+  );
+};
+export default ListContainer;
